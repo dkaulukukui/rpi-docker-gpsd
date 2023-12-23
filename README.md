@@ -38,7 +38,7 @@ services:
   gpsd:
     image: jfig/rpi-docker-gpsd
     devices:
-      - "/dev/ttyACM0:/dev/ttyUSB0"
+      - "/dev/ttyACM0:/dev/ttyUSB0
     ports:
       - "2947:2947"
     restart: always
