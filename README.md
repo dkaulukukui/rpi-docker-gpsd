@@ -5,7 +5,8 @@ Raspberry Pi, making it available as a network service. `gpsd` is a daemon
 that monitors one or more GPSes or AIS receivers attached to a host computer 
 through serial or USB ports.
 
-**Docker image:** jfig/rpi-docker-gpsd:tagname
+**Docker image:** jfig/rpi-docker-gpsd
+
 **Github repo:** https://github.com/jfig/rpi-docker-python-gpio
 
 
