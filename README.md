@@ -16,9 +16,9 @@ Ensure Docker is installed on your Raspberry Pi.
 
 ## Build
 
-'''bash
+```bash 
  sudo docker build -t rpi-gpsd .
-'''
+```
 
 
 ## Usage
