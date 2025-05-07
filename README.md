@@ -14,6 +14,12 @@ through serial or USB ports.
 
 Ensure Docker is installed on your Raspberry Pi.
 
+##Build
+
+'''bash
+ sudo docker build -t rpi-gpsd .
+'''
+
 
 ## Usage
 
@@ -23,7 +29,7 @@ container. This is essential for `gpsd` to communicate with the GPS device.
 The default command to run the container is:
 
 ```bash 
-docker run --rm -it --device=/dev/ttyACM0:/dev/ttyUSB0 -p 2947:2947 gpsd
+sudo docker run --rm -it --device=/dev/serial0 -p 2947:2947 rpi-gpsd
 ```
 Here's what each parameter does:
 
