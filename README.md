@@ -14,7 +14,7 @@ through serial or USB ports.
 
 Ensure Docker is installed on your Raspberry Pi.
 
-##Build
+## Build
 
 '''bash
  sudo docker build -t rpi-gpsd .
