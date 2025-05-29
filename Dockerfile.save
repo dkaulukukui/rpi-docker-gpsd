@@ -9,6 +9,7 @@ FROM alpine:latest
 # Update apk repositories and install gpsd
 RUN apk update && \
     apk add --no-cache \
+    linux-headers \
     pps-tools \
     gpsd \
     gpsd-clients \
@@ -21,7 +22,6 @@ RUN apk update && \
 # Expose the gpsd port (2947 is the default gpsd port)
 EXPOSE 2947
 
-COPY timeapps.h /sys/timeapps.h
 
 # Copy chrony config file 
 COPY chrony.conf /etc/chrony/chrony.conf
