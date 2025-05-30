@@ -5,14 +5,16 @@ Raspberry Pi, making it available as a network service. `gpsd` is a daemon
 that monitors one or more GPSes or AIS receivers attached to a host computer 
 through serial or USB ports.
 
-**Docker image:** jfig/rpi-docker-gpsd
-
-**Github repo:** https://github.com/jfig/rpi-docker-python-gpio
-
 
 ## Prerequisites
 
 Ensure Docker is installed on your Raspberry Pi.
+
+## Build
+
+```bash 
+ sudo docker build -t rpi-gpsd .
+```
 
 
 ## Usage
@@ -23,7 +25,7 @@ container. This is essential for `gpsd` to communicate with the GPS device.
 The default command to run the container is:
 
 ```bash 
-docker run --rm -it --device=/dev/ttyACM0:/dev/ttyUSB0 -p 2947:2947 gpsd
+sudo docker run --rm -it --device=/dev/serial0 -p 2947:2947 rpi-gpsd
 ```
 Here's what each parameter does:
 
@@ -56,3 +58,97 @@ services:
       GPSD_PORT: 2947
     restart: always
 ```
+
+
+## Resources: 
+
+Main tutorial:  [Revisiting Microsecond Accurate NTP for Raspberry Pi with GPS PPS in 2025 - Austin's Nerdy Things](https://austinsnerdythings.com/2025/02/14/revisiting-microsecond-accurate-ntp-for-raspberry-pi-with-gps-pps-in-2025/) <br>
+Repo:  [dkaulukukui/docker_gpsd_alpine](https://github.com/dkaulukukui/docker_gpsd_alpine) <br>
+GPSD references:  [GPSD Time Service HOWTO](https://gpsd.gitlab.io/gpsd/gpsd-time-service-howto.html) <br>
+PPS tools resources: https://github.com/redlab-i/pps-tools?tab=readme-ov-file <br>
+Chrony resource: https://chrony-project.org/ <br>
+	
+
+## Efforts so far: 
+
+Followed the main tutorial above and was able to get everything working with both the Adafruit GPS featherwing and the Sparkfun Zed board <br>
+
+Containerization efforts
+- Alpine based container
+- See repo - dkaulukukui/docker_gpsd_alpine
+- So far I am able to run the container and verify PPS (step 4 from the main tutorial) however when I check GPS via gpsmon there is no PPS offset shown. 
+- Current issues: 
+	- When chrony is configured to use refclock PPS an error is kicked out saying that module is not compiled in 
+
+   		> 2025-05-28T22:53:23Z Fatal error : refclock driver PPS is not compiled in
+
+     	- Review of the build logs from the alpine APK chrony respository build indicates that refclock is compiled in.  This determination is based on the fact that timepps.h is found and included in the build log.
+        - APK GPSD info: https://pkgs.alpinelinux.org/package/edge/main/x86/gpsd
+  
+	
+ 	- When GPSD container is started the follow warnings are displayed: 
+			
+		> gpsd:WARN: KPPS:/dev/ttyAMA0 no HAVE_SYS_TIMEPPS_H, PPS accuracy will suffer
+  		> 	
+		> gpsd:WARN: KPPS:/dev/pps0 no HAVE_SYS_TIMEPPS_H, PPS accuracy will suffer
+		>
+  		> gpsd:WARN: PPS:/dev/pps0 die: no TIOMCIWAIT, nor RFC2783 CANWAIT
+			
+
+## Workflow to reproduce issue on raspi: 
+- From ~/NTP/rpi-docker-gpsd
+
+```bash 
+cd /NTP/rpi-docker-gpsd
+```
+
+- Build container
+
+```bash 
+sudo docker build -t rpi-gpsd ~/NTP/rpi-docker-gpsd/
+```
+
+- Run container
+
+```bash 
+sudo docker run --rm -it --device=/dev/ttyAMA0 --device=/dev/pps0 -p 2948:2947 --name gpsd --privileged rpi-gpsd
+```
+
+- Launch another terminal and run
+
+```bash 
+sudo docker exec -it gpsd bash
+```
+
+- Check PPS
+
+```bash 
+sudo ppstest /dev/pps0
+```
+
+- Check gps
+
+```bash 
+cgps
+```
+
+```bash 
+gpsmon
+```
+- Try to launch chrony
+
+```bash 
+/usr/sbin/chronyd -u chrony -d -x -L 3
+```
+
+ - ERROR response of 	
+ 	> 2025-05-28T22:53:23Z Fatal error : refclock driver PPS is not compiled in!
+
+## Next steps
+
+- investigate further the GPSD warnings about KPPS and PPS and determine what needs to be done to fix
+- fork repo to use another version of linux (debian based) which may have more default functionality to see if that will fix issues
+
+## To do once issues are resolved: 
+- setup chrony configuration file properly
+- implement startup.sh to launch gpsd and chrony when container is brought up
