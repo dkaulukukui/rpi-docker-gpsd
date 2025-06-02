@@ -1,19 +1,194 @@
-#!/bin/sh
+#!/bin/bash
+set -euo pipefail  # Exit on error, undefined vars, pipe failures
 
-# Start gpsd and forward arguments
-# Replace /dev/ttyUSB0 with your GPS device path
+# Configuration variables
+GPS_DEVICE="${GPS_DEVICE:-/dev/ttyAMA0}"
+PPS_DEVICE="${PPS_DEVICE:-/dev/pps0}"
+GPS_SPEED="${GPS_SPEED:-38400}"
+GPSD_SOCKET="${GPSD_SOCKET:-/var/run/gpsd.sock}"
+DEBUG_LEVEL="${DEBUG_LEVEL:-1}"
+LOG_LEVEL="${LOG_LEVEL:-0}"
 
-#exec sh -c "echo 'Inside Container:' && echo 'User: $(whoami) UID: $(id -u) GID: $(id -g)'"
+# Function to log messages with timestamps
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+}
 
-# Start GPSD service
-# -G means to listen on all addresses rather than just the loopback
-# -N means to dont deamonize and run in the foreground
-# -n means to not wait for a client to connect before polling GPS
-# -D3 means to set the debug level to 3
-# -F means to create a control socket for device addition and removal commands
-# -s sets a fixed port speed for the GNSS device, default is autobaud
-# /dev/ttyAMA0 is the serial port of the Local GNSS device
-# /dev/pps0 is the Local PPS device
+# Function to check if device exists
+check_device() {
+    local device="$1"
+    if [[ ! -e "$device" ]]; then
+        log "WARNING: Device $device does not exist"
+        return 1
+    fi
+    return 0
+}
 
-#exec sudo gpsd -GNn -D3 -F /var/run/gpsd.sock -s 38400 /dev/ttyAMA0 /dev/pps0 "$@"
-exec sudo gpsd -GNn -D1 -F /var/run/gpsd.sock -s 38400 /dev/ttyAMA0 /dev/pps0 "$@"
+# Function to start gpsd
+start_gpsd() {
+    log "Starting GPSD service..."
+    
+    # Check if GPS device exists
+    if ! check_device "$GPS_DEVICE"; then
+        log "ERROR: GPS device $GPS_DEVICE not found"
+        return 1
+    fi
+    
+    # Check if PPS device exists (optional)
+    local pps_arg=""
+    if check_device "$PPS_DEVICE"; then
+        pps_arg="$PPS_DEVICE"
+        log "PPS device found: $PPS_DEVICE"
+    else
+        log "WARNING: PPS device $PPS_DEVICE not found, continuing without PPS"
+    fi
+    
+    # Build gpsd command
+    local gpsd_cmd=(
+        gpsd
+        -G              # Listen on all addresses
+        -n              # Don't wait for client to connect
+        -D"$DEBUG_LEVEL" # Debug level
+        -F "$GPSD_SOCKET" # Control socket
+        -s "$GPS_SPEED"   # Fixed speed
+        "$GPS_DEVICE"
+    )
+    
+    # Add PPS device if available
+    [[ -n "$pps_arg" ]] && gpsd_cmd+=("$pps_arg")
+    
+    # Add any additional arguments
+    gpsd_cmd+=("$@")
+    
+    log "Executing: ${gpsd_cmd[*]}"
+    "${gpsd_cmd[@]}" &
+    local gpsd_pid=$!
+    log "GPSD started with PID: $gpsd_pid"
+    echo "$gpsd_pid" > /var/run/gpsd.pid
+    
+    return 0
+}
+
+# Function to start chronyd
+start_chronyd() {
+    log "Starting Chrony service..."
+    
+    # Check if chronyd exists
+    if [[ ! -x "/usr/sbin/chronyd" ]]; then
+        log "ERROR: chronyd not found at /usr/sbin/chronyd"
+        return 1
+    fi
+    
+    local chronyd_cmd=(
+        /usr/sbin/chronyd
+        -u chrony       # Run as chrony user
+        -d              # Foreground mode
+        -x              # Don't make large time adjustments
+        -L"$LOG_LEVEL"  # Log level
+    )
+    
+    log "Executing: ${chronyd_cmd[*]}"
+    "${chronyd_cmd[@]}" &
+    local chronyd_pid=$!
+    log "Chronyd started with PID: $chronyd_pid"
+    echo "$chronyd_pid" > /var/run/chronyd.pid
+    
+    return 0
+}
+
+# Function to handle shutdown signals
+cleanup() {
+    log "Received shutdown signal, cleaning up..."
+    
+    # Kill chronyd if running
+    if [[ -f /var/run/chronyd.pid ]]; then
+        local chronyd_pid=$(cat /var/run/chronyd.pid)
+        if kill -0 "$chronyd_pid" 2>/dev/null; then
+            log "Stopping chronyd (PID: $chronyd_pid)"
+            kill -TERM "$chronyd_pid"
+            wait "$chronyd_pid" 2>/dev/null || true
+        fi
+        rm -f /var/run/chronyd.pid
+    fi
+    
+    # Kill gpsd if running
+    if [[ -f /var/run/gpsd.pid ]]; then
+        local gpsd_pid=$(cat /var/run/gpsd.pid)
+        if kill -0 "$gpsd_pid" 2>/dev/null; then
+            log "Stopping gpsd (PID: $gpsd_pid)"
+            kill -TERM "$gpsd_pid"
+            wait "$gpsd_pid" 2>/dev/null || true
+        fi
+        rm -f /var/run/gpsd.pid
+    fi
+    
+    log "Cleanup completed"
+    exit 0
+}
+
+# Function to wait for services and monitor them
+monitor_services() {
+    log "Monitoring services..."
+    
+    while true; do
+        # Check if gpsd is still running
+        if [[ -f /var/run/gpsd.pid ]]; then
+            local gpsd_pid=$(cat /var/run/gpsd.pid)
+            if ! kill -0 "$gpsd_pid" 2>/dev/null; then
+                log "ERROR: GPSD process died unexpectedly"
+                cleanup
+                exit 1
+            fi
+        fi
+        
+        # Check if chronyd is still running
+        if [[ -f /var/run/chronyd.pid ]]; then
+            local chronyd_pid=$(cat /var/run/chronyd.pid)
+            if ! kill -0 "$chronyd_pid" 2>/dev/null; then
+                log "ERROR: Chronyd process died unexpectedly"
+                cleanup
+                exit 1
+            fi
+        fi
+        
+        sleep 5
+    done
+}
+
+# Main execution
+main() {
+    log "=== GPS/Chrony Startup Script ==="
+    log "Container info:"
+    log "  User: $(whoami) UID: $(id -u) GID: $(id -g)"
+    log "  GPS Device: $GPS_DEVICE"
+    log "  PPS Device: $PPS_DEVICE"
+    log "  GPS Speed: $GPS_SPEED"
+    log "  Debug Level: $DEBUG_LEVEL"
+    log "  Log Level: $LOG_LEVEL"
+    
+    # Set up signal handlers
+    trap cleanup SIGTERM SIGINT SIGQUIT
+    
+    # Start services
+    if ! start_gpsd "$@"; then
+        log "ERROR: Failed to start GPSD"
+        exit 1
+    fi
+    
+    # Give gpsd a moment to initialize
+    sleep 2
+    
+    if ! start_chronyd; then
+        log "ERROR: Failed to start Chronyd"
+        cleanup
+        exit 1
+    fi
+    
+    log "All services started successfully"
+    
+    # Monitor services
+    monitor_services
+}
+
+# Run main function with all arguments
+main "$@"
