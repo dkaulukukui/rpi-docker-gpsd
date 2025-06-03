@@ -62,6 +62,7 @@ services:
 
 ## Resources: 
 
+
 Main tutorial:  [Revisiting Microsecond Accurate NTP for Raspberry Pi with GPS PPS in 2025 - Austin's Nerdy Things](https://austinsnerdythings.com/2025/02/14/revisiting-microsecond-accurate-ntp-for-raspberry-pi-with-gps-pps-in-2025/) <br>
 Repo:  [dkaulukukui/docker_gpsd_alpine](https://github.com/dkaulukukui/docker_gpsd_alpine) <br>
 GPSD references:  [GPSD Time Service HOWTO](https://gpsd.gitlab.io/gpsd/gpsd-time-service-howto.html) <br>
@@ -97,6 +98,7 @@ Containerization efforts
 
 ## Workflow to reproduce issue on raspi: 
 - From ~/NTP/rpi-docker-gpsd
+
 
 ```bash 
 cd /NTP/rpi-docker-gpsd
@@ -152,3 +154,6 @@ gpsmon
 ## To do once issues are resolved: 
 - setup chrony configuration file properly
 - implement startup.sh to launch gpsd and chrony when container is brought up
+- dial back docker --privlidged flag and make sure everything still works
+- setup alpine chrony only container for remote NTP side
+
