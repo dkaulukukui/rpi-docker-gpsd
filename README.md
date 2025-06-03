@@ -5,10 +5,6 @@ Raspberry Pi, making it available as a network service. `gpsd` is a daemon
 that monitors one or more GPSes or AIS receivers attached to a host computer 
 through serial or USB ports.
 
-**Docker image:** jfig/rpi-docker-gpsd
-
-**Github repo:** https://github.com/jfig/rpi-docker-python-gpio
-
 
 ## Prerequisites
 
@@ -66,11 +62,12 @@ services:
 
 ## Resources: 
 
-	- Main tutorial:  [Revisiting Microsecond Accurate NTP for Raspberry Pi with GPS PPS in 2025 - Austin's Nerdy Things](https://austinsnerdythings.com/2025/02/14/revisiting-microsecond-accurate-ntp-for-raspberry-pi-with-gps-pps-in-2025/)
-	- Repo:  [dkaulukukui/docker_gpsd_alpine](https://github.com/dkaulukukui/docker_gpsd_alpine)
-	- GPSD references:  [GPSD Time Service HOWTO](https://gpsd.gitlab.io/gpsd/gpsd-time-service-howto.html)
-	- PPS tools resources: https://github.com/redlab-i/pps-tools?tab=readme-ov-file
-	- Chrony resource: https://chrony-project.org/
+
+Main tutorial:  [Revisiting Microsecond Accurate NTP for Raspberry Pi with GPS PPS in 2025 - Austin's Nerdy Things](https://austinsnerdythings.com/2025/02/14/revisiting-microsecond-accurate-ntp-for-raspberry-pi-with-gps-pps-in-2025/) <br>
+Repo:  [dkaulukukui/docker_gpsd_alpine](https://github.com/dkaulukukui/docker_gpsd_alpine) <br>
+GPSD references:  [GPSD Time Service HOWTO](https://gpsd.gitlab.io/gpsd/gpsd-time-service-howto.html) <br>
+PPS tools resources: https://github.com/redlab-i/pps-tools?tab=readme-ov-file <br>
+Chrony resource: https://chrony-project.org/ <br>
 	
 
 ## Efforts so far: 
@@ -101,20 +98,51 @@ Containerization efforts
 
 ## Workflow to reproduce issue on raspi: 
 - From ~/NTP/rpi-docker-gpsd
+
+
+```bash 
+cd /NTP/rpi-docker-gpsd
+```
+
 - Build container
-	>  sudo docker build -t rpi-gpsd ~/NTP/rpi-docker-gpsd/
+
+```bash 
+sudo docker build -t rpi-gpsd ~/NTP/rpi-docker-gpsd/
+```
+
 - Run container
- 	> sudo docker run --rm -it --device=/dev/ttyAMA0 --device=/dev/pps0 -p 2948:2947 --name gpsd --privileged rpi-gpsd
+
+```bash 
+sudo docker run --rm -it --device=/dev/ttyAMA0 --device=/dev/pps0 -p 2948:2947 --name gpsd --privileged rpi-gpsd
+```
+
 - Launch another terminal and run
-	> Sudo docker exec -it gpsd bash
+
+```bash 
+sudo docker exec -it gpsd bash
+```
 
 - Check PPS
-	> Sudo ppstest /dev/pps0
+
+```bash 
+sudo ppstest /dev/pps0
+```
+
 - Check gps
-	> Cgps <br>
-	> Gpsmon
+
+```bash 
+cgps
+```
+
+```bash 
+gpsmon
+```
 - Try to launch chrony
-	> /usr/sbin/chronyd -u chrony -d -x -L 3
+
+```bash 
+/usr/sbin/chronyd -u chrony -d -x -L 3
+```
+
  - ERROR response of 	
  	> 2025-05-28T22:53:23Z Fatal error : refclock driver PPS is not compiled in!
 
