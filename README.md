@@ -47,12 +47,21 @@ sudo docker build -t rpi-gpsd .
     sudo bash -c "echo 'dtoverlay=pps-gpio,gpiopin=18' >> /boot/firmware/config.txt"
     ``` 
 
-2. Enable UART and set the initial baud rate. Note: Set baud rate for the specific GPS unit you have, if avaialble use the highest most frequently updated GPS output settings.  GPSD can parse most common GPS receiver outputs automatically and for the most part anything is better than the default 9600 NMEA.
+2. Enable UART and set the initial baud rate. 
+
+    Note: Set baud rate for the specific GPS unit you have, if avaialble use the highest most frequently updated GPS output settings.  GPSD can parse most common GPS receiver outputs automatically and for the most part anything is better than the default 9600 NMEA.
+
+        ```bash
+        sudo bash -c "echo 'enable_uart=1' >> /boot/firmware/config.txt"
+        sudo bash -c "echo 'init_uart_baud=38400' >> /boot/firmware/config.txt"
+        ```
+
+    The matching GPS speed will also need to be set on line 7 of entrypoint.sh
 
     ```bash
-    sudo bash -c "echo 'enable_uart=1' >> /boot/firmware/config.txt"
-    sudo bash -c "echo 'init_uart_baud=9600' >> /boot/firmware/config.txt"
+    GPS_SPEED="${GPS_SPEED:-38400}"
     ```
+
 
 3. In /etc/modules, add ‘pps-gpio’ to a new line.
 
