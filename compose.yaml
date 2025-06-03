@@ -26,8 +26,6 @@ services:
           ENABLE_SYSCLK: "true"
         ports:
          - 123:123/udp
-        volumes:
-         - ./chrony_config:/etc/chrony/
         restart: always
         stdin_open: true
         tty: true
