@@ -11,7 +11,7 @@ Together these services allow for a GPS 1PPS corrected timeserver.
 
 
 Main tutorial:  [Revisiting Microsecond Accurate NTP for Raspberry Pi with GPS PPS in 2025 - Austin's Nerdy Things](https://austinsnerdythings.com/2025/02/14/revisiting-microsecond-accurate-ntp-for-raspberry-pi-with-gps-pps-in-2025/) <br>
-Repo:  [dkaulukukui/docker_gpsd_alpine](https://github.com/dkaulukukui/docker_gpsd_alpine) <br>
+Repo:  [dkaulukukui/rpi-docker-gpsd-chrony](https://github.com/dkaulukukui/rpi-docker-gpsd-chrony) <br>
 GPSD references:  [GPSD Time Service HOWTO](https://gpsd.gitlab.io/gpsd/gpsd-time-service-howto.html) <br>
 PPS tools resources: https://github.com/redlab-i/pps-tools?tab=readme-ov-file <br>
 Chrony resource: https://chrony-project.org/ <br>
@@ -28,7 +28,7 @@ Chrony resource: https://chrony-project.org/ <br>
 ### 1. Copy github project 
 
 ```bash
-git clone https://github.com/dkaulukukui/rpi-docker-gpsd
+git clone https://github.com/dkaulukukui/rpi-docker-gpsd-chrony
 ```
 
 
