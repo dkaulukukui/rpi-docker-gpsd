@@ -12,3 +12,31 @@ services:
         container_name: gpsd
         privileged: true
         image: rpi-gpsd
+        networks:
+          NTP_NET:
+            ipv4_address: 172.30.0.2
+
+    chrony:
+        image: dockurr/chrony
+        container_name: chrony
+        cap_add:
+          - SYS_TIME
+        environment:
+          NTP_SERVERS: "172.30.0.2"
+          ENABLE_SYSCLK: "true"
+        ports:
+         - 123:123/udp
+        volumes:
+         - ./chrony_config:/etc/chrony/
+        restart: always
+        stdin_open: true
+        tty: true
+        networks:
+          NTP_NET:
+            ipv4_address: 172.30.0.3
+
+networks: 
+  NTP_NET:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
