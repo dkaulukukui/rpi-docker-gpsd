@@ -16,12 +16,16 @@ RUN apk update && \
     bash \
     sudo \
     nano \
+    openrc \
     && rm -rf /var/cache/apk/*
 
 # Expose the gpsd port (2947 is the default gpsd port)
 EXPOSE 2947
 
-COPY timeapps.h /sys/timeapps.h
+# Expose the chrony ntp port
+EXPOSE 123
+
+#COPY timeapps.h /sys/timeapps.h
 
 # Copy chrony config file 
 COPY chrony.conf /etc/chrony/chrony.conf

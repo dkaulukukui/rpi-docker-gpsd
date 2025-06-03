@@ -6,8 +6,8 @@ GPS_DEVICE="${GPS_DEVICE:-/dev/ttyAMA0}"
 PPS_DEVICE="${PPS_DEVICE:-/dev/pps0}"
 GPS_SPEED="${GPS_SPEED:-38400}"
 GPSD_SOCKET="${GPSD_SOCKET:-/var/run/gpsd.sock}"
-DEBUG_LEVEL="${DEBUG_LEVEL:-1}"
-LOG_LEVEL="${LOG_LEVEL:-0}"
+DEBUG_LEVEL="${DEBUG_LEVEL:-1}" #gpsd debug level
+LOG_LEVEL="${LOG_LEVEL:-0}" #chrony log level
 
 # Function to log messages with timestamps
 log() {
@@ -45,7 +45,7 @@ start_gpsd() {
     
     # Build gpsd command
     local gpsd_cmd=(
-        gpsd
+	gpsd
         -G              # Listen on all addresses
         -n              # Don't wait for client to connect
         -D"$DEBUG_LEVEL" # Debug level
@@ -163,8 +163,8 @@ main() {
     log "  GPS Device: $GPS_DEVICE"
     log "  PPS Device: $PPS_DEVICE"
     log "  GPS Speed: $GPS_SPEED"
-    log "  Debug Level: $DEBUG_LEVEL"
-    log "  Log Level: $LOG_LEVEL"
+    log "  GPSD Debug Level: $DEBUG_LEVEL"
+    log "  Chrony Log Level: $LOG_LEVEL"
     
     # Set up signal handlers
     trap cleanup SIGTERM SIGINT SIGQUIT
@@ -183,11 +183,15 @@ main() {
         cleanup
         exit 1
     fi
+
+    sleep 120
     
     log "All services started successfully"
     
     # Monitor services
-    monitor_services
+    #monitor_services
+
+    wait
 }
 
 # Run main function with all arguments
