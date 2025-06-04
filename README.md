@@ -31,11 +31,10 @@ Chrony resource: https://chrony-project.org/ <br>
 git clone https://github.com/dkaulukukui/rpi-docker-gpsd-chrony
 ```
 
-
 ### 2. Build Image
 
 ```bash
-cd rpi-docker-gpsd
+cd rpi-docker-gpsd-chrony
 sudo docker build -t rpi-gpsd .
 ```
 
