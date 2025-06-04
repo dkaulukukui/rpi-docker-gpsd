@@ -20,7 +20,11 @@ Chrony resource: https://chrony-project.org/ <br>
 ## Prerequisites
 
 - Raspberry Pi with Docker installed.
-- timing specific GPS module
+    - tested on RPI 4 Model B (8GB RAM) 
+    - tested on Debian 12 (Bookworm) with Kernal version 6.6.51+rpt-rpi-v8
+    - tested on Docker version 27.5.1
+- GPS module (timing model preferred)
+    - tested on [Sparkfun Zed-9P](https://www.sparkfun.com/sparkfun-gps-rtk-sma-breakout-zed-f9p-qwiic.html)
 - 5 wires needed – +VDC/RX/TX/GND/PPS
 
 ## Setup and Configuration Steps
@@ -95,12 +99,14 @@ Run raspi-config -> 3 – Interface options -> I6 – Serial Port -> Would you l
 The command to bring up both containers (attached to the stdio terminal, useful for debugging) is:
 
 ```bash 
+cd rpi-docker-gpsd-chrony
 sudo docker compose up 
 ```
 
 The command to bring up both containers in the background is:
 
 ```bash 
+cd rpi-docker-gpsd-chrony
 sudo docker compose up --detach
 ```
 
