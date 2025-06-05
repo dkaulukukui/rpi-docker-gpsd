@@ -65,7 +65,7 @@ git clone https://github.com/dkaulukukui/rpi-docker-gpsd-chrony
     sudo bash -c "echo 'pps-gpio' >> /etc/modules"
     ```
 
-4. Modify Device tree overlay to disable bluetooth on UART1
+4. Modify Device tree overlay to disable bluetooth on UART0
 
 	```bash
 	sudo bash -c "echo '# Disable Bluetooth' >> /boot/firmware/config.txt"
