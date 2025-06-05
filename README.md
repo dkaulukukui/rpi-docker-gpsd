@@ -35,14 +35,7 @@ Chrony resource: https://chrony-project.org/ <br>
 git clone https://github.com/dkaulukukui/rpi-docker-gpsd-chrony
 ```
 
-### 2. Build Image
-
-```bash
-cd rpi-docker-gpsd-chrony
-sudo docker build -t rpi-gpsd .
-```
-
-### 3. Setup Raspi GPIO
+### 2. Setup Raspi GPIO
 1. Enable the PPS dignal on Pin 18. In /boot/firmware/config.txt add the below to a new line.
 
     ```bash
@@ -54,10 +47,10 @@ sudo docker build -t rpi-gpsd .
 
     Note: Set baud rate for the specific GPS unit you have, if avaialble use the highest most frequently updated GPS output settings.  GPSD can parse most common GPS receiver outputs automatically and for the most part anything is better than the default 9600 NMEA.
 
-        ```bash
-        sudo bash -c "echo 'enable_uart=1' >> /boot/firmware/config.txt"
-        sudo bash -c "echo 'init_uart_baud=38400' >> /boot/firmware/config.txt"
-        ```
+    ```bash
+    sudo bash -c "echo 'enable_uart=1' >> /boot/firmware/config.txt"
+    sudo bash -c "echo 'init_uart_baud=38400' >> /boot/firmware/config.txt"
+    ```
 
     The matching GPS speed will also need to be set on line 7 of entrypoint.sh
 
@@ -72,11 +65,18 @@ sudo docker build -t rpi-gpsd .
     sudo bash -c "echo 'pps-gpio' >> /etc/modules"
     ```
 
-4. Reboot
+4. Modify Device tree overlay to swap ttyAMA0 and ttyS0, Edit /etc/udev/rules.d/80-serialnames.rules
 
     ```bash
-    sudo reboot
+    KERNEL=="ttyAMA0",SYMLINK+="ttyS0" GROUP="dialout"
+    KERNEL=="ttyACM0",SYMLINK+="ttyS1" GROUP="dialout"
     ```
+
+### 4. Enable the serial hardware port
+
+Run raspi-config -> 3 – Interface options -> I6 – Serial Port -> Would you like a login shell to be available over serial -> No. -> Would you like the serial port hardware to be enabled -> Yes.
+
+Reboot -> Yes
 
 ### 4. Wire up the GPS module
 
@@ -90,11 +90,14 @@ Pin connections:
 4. GPS RX to RPi UART TX pin 8 (GPIO14)
 5. GPS TX to RPi UART RX pin 10 (GPIO15)
 
-### 5. Enable the serial hardware port
+### 5. Build Image
 
-Run raspi-config -> 3 – Interface options -> I6 – Serial Port -> Would you like a login shell to be available over serial -> No. -> Would you like the serial port hardware to be enabled -> Yes.
+```bash
+cd rpi-docker-gpsd-chrony
+sudo docker build -t rpi-gpsd .
+```
 
-## Bring up the container
+### 6. Bring up the container
 
 The command to bring up both containers (attached to the stdio terminal, useful for debugging) is:
 
@@ -121,6 +124,8 @@ sudo docker compose up --detach
 
 2. Check GPSD 
 
+    - If opened as attached, open a new terminal window.
+    
     - Attach container terminal 
 
         ```sudo docker exec -it gpsd bash```
