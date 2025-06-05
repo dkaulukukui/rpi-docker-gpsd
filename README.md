@@ -65,12 +65,12 @@ git clone https://github.com/dkaulukukui/rpi-docker-gpsd-chrony
     sudo bash -c "echo 'pps-gpio' >> /etc/modules"
     ```
 
-4. Modify Device tree overlay to swap ttyAMA0 and ttyS0, Edit /etc/udev/rules.d/80-serialnames.rules
+4. Modify Device tree overlay to disable bluetooth on UART1
 
-    ```bash
-    KERNEL=="ttyAMA0",SYMLINK+="ttyS0" GROUP="dialout"
-    KERNEL=="ttyACM0",SYMLINK+="ttyS1" GROUP="dialout"
-    ```
+	```bash
+	sudo bash -c "echo '# Disable Bluetooth' >> /boot/firmware/config.txt"
+	sudo bash -c "echo 'dtoverlay=disable-bt' >> /boot/firmware/config.txt"
+	```
 
 ### 4. Enable the serial hardware port
 
