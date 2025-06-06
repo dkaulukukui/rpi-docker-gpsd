@@ -4,10 +4,12 @@ set -euo pipefail  # Exit on error, undefined vars, pipe failures
 # Configuration variables
 GPS_DEVICE="${GPS_DEVICE:-/dev/ttyAMA0}"
 PPS_DEVICE="${PPS_DEVICE:-/dev/pps0}"
-GPS_SPEED="${GPS_SPEED:-38400}"
+GPS_SPEED="${GPS_SPEED:-9600}"
 GPSD_SOCKET="${GPSD_SOCKET:-/var/run/gpsd.sock}"
 DEBUG_LEVEL="${DEBUG_LEVEL:-1}" #gpsd debug level
 LOG_LEVEL="${LOG_LEVEL:-0}" #chrony log level
+
+
 
 # Function to log messages with timestamps
 log() {
@@ -78,12 +80,49 @@ start_chronyd() {
         log "ERROR: chronyd not found at /usr/sbin/chronyd"
         return 1
     fi
+
+    # Check if chrony user exists
+    if ! id -u chrony &>/dev/null; then
+        log "ERROR: User 'chrony' does not exist"
+        return 1
+    fi
+
+    # confirm correct permissions on chrony run directory
+        if [ -d /run/chrony ]; then
+        chown -R chrony:chrony /run/chrony
+        chmod o-rx /run/chrony
+        # remove previous pid file if it exist
+        rm -f /var/run/chrony/chronyd.pid
+    fi
+
+    # confirm correct permissions on chrony variable state directory
+    if [ -d /var/lib/chrony ]; then
+        chown -R chrony:chrony /var/lib/chrony
+    fi
+
+    # LOG_LEVEL environment variable is not present, so populate with chrony default (0)
+    # chrony log levels: 0 (informational), 1 (warning), 2 (non-fatal error) and 3 (fatal error)
+    if [ -z "${LOG_LEVEL}" ]; then
+        LOG_LEVEL=0
+    else
+    # confirm log level is between 0-3, since these are the only log levels supported
+        if expr "${LOG_LEVEL}" : "[^0123]" > /dev/null; then
+            # level outside of supported range, let's set to default (0)
+            LOG_LEVEL=0
+        fi
+    fi
+
+    # enable control of system clock, enabled by default
+    SYSCLK=""
+    if [[ "${ENABLE_SYSCLK:-true}" = false ]]; then
+        SYSCLK="-x"
+    fi
     
     local chronyd_cmd=(
         /usr/sbin/chronyd
         -u chrony       # Run as chrony user
         -d              # Foreground mode
-        -x              # Don't make large time adjustments
+        ${SYSCLK}       # Allow system clock control
         -L"$LOG_LEVEL"  # Log level
     )
     
@@ -170,28 +209,33 @@ main() {
     trap cleanup SIGTERM SIGINT SIGQUIT
     
     # Start services
-    if ! start_gpsd "$@"; then
-        log "ERROR: Failed to start GPSD"
-        exit 1
-    fi
-    
-    # Give gpsd a moment to initialize
-    sleep 2
-    
+
+    # start chronyd first
     if ! start_chronyd; then
         log "ERROR: Failed to start Chronyd"
         cleanup
         exit 1
     fi
 
-    sleep 120
+    sleep 2
+
+    # now start gpsd
+    if ! start_gpsd "$@"; then
+        log "ERROR: Failed to start GPSD"
+        exit 1
+    fi
+    
+    # Give gpsd a moment to initialize
+
+    sleep 10
     
     log "All services started successfully"
+
     
-    # Monitor services
+    # Monitor services, not working correctly right now
     #monitor_services
 
-    wait
+    wait  #hack to keep containers running, remove after monitor services is fixed
 }
 
 # Run main function with all arguments
