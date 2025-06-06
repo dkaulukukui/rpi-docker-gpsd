@@ -15,7 +15,7 @@ Repo:  [dkaulukukui/rpi-docker-gpsd-chrony](https://github.com/dkaulukukui/rpi-d
 GPSD references:  [GPSD Time Service HOWTO](https://gpsd.gitlab.io/gpsd/gpsd-time-service-howto.html) <br>
 PPS tools resources: https://github.com/redlab-i/pps-tools?tab=readme-ov-file <br>
 Chrony resource: https://chrony-project.org/ <br>
-Raspberry Pi configuration:[UART Confguration] (https://www.raspberrypi.com/documentation/computers/configuration.html#primary-uart) <br>
+Raspberry Pi configuration: [UART Confguration](https://www.raspberrypi.com/documentation/computers/configuration.html#primary-uart) <br>
 
 
 ## Prerequisites
