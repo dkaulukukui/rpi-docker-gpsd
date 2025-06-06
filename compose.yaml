@@ -4,37 +4,21 @@ services:
         stdin_open: true
         tty: true
         devices:
-            - /dev/serial0
+            - /dev/ttyAMA0
             - /dev/pps0
         ports:
             #- 2948:2947
             - 123:123
         container_name: gpsd
+        cap_add:
+            - SYS_TIME
         privileged: true
         image: rpi-gpsd
-#         networks:
-#           NTP_NET:
-#             ipv4_address: 172.30.0.2
+        volumes:
+            - chrony_logs:/var/log/chrony
+            - chrony_drift:/var/lib/chrony
 
-#     chrony:
-#         image: dockurr/chrony
-#         container_name: chrony
-#         cap_add:
-#           - SYS_TIME
-#         environment:
-#           NTP_SERVERS: "172.30.0.2"
-#           ENABLE_SYSCLK: "true"
-#         ports:
-#          - 123:123/udp
-#         restart: always
-#         stdin_open: true
-#         tty: true
-#         networks:
-#           NTP_NET:
-#             ipv4_address: 172.30.0.3
+volumes:
+    chrony_logs:
 
-# networks: 
-#   NTP_NET:
-#     ipam:
-#       config:
-#         - subnet: 172.30.0.0/16
+    chrony_drift:

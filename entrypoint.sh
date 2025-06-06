@@ -2,7 +2,7 @@
 set -euo pipefail  # Exit on error, undefined vars, pipe failures
 
 # Configuration variables
-GPS_DEVICE="${GPS_DEVICE:-/dev/serial0}"
+GPS_DEVICE="${GPS_DEVICE:-/dev/ttyAMA0}"
 PPS_DEVICE="${PPS_DEVICE:-/dev/pps0}"
 GPS_SPEED="${GPS_SPEED:-9600}"
 GPSD_SOCKET="${GPSD_SOCKET:-/var/run/gpsd.sock}"
@@ -209,28 +209,33 @@ main() {
     trap cleanup SIGTERM SIGINT SIGQUIT
     
     # Start services
+
+    # start chronyd first
+    if ! start_chronyd; then
+        log "ERROR: Failed to start Chronyd"
+        cleanup
+        exit 1
+    fi
+
+    sleep 2
+
+    # now start gpsd
     if ! start_gpsd "$@"; then
         log "ERROR: Failed to start GPSD"
         exit 1
     fi
     
     # Give gpsd a moment to initialize
-    sleep 2
-    
-    if ! start_chronyd; then
-        log "ERROR: Failed to start Chronyd"
-        cleanup
-        exit 1
-    fi
+
+    sleep 10
     
     log "All services started successfully"
+
     
-    sleep 120
-    
-    # Monitor services
+    # Monitor services, not working correctly right now
     #monitor_services
 
-    wait
+    wait  #hack to keep containers running, remove after monitor services is fixed
 }
 
 # Run main function with all arguments

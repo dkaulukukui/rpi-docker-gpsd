@@ -37,7 +37,7 @@ EXPOSE 123/udp
 COPY chrony.conf /etc/chrony/chrony.conf
 
 # marking volumes that need to be writable
-VOLUME /etc/chrony /run/chrony /var/lib/chrony
+VOLUME /etc/chrony /run/chrony /var/lib/chrony /var/log/chrony
 
 # let docker know how to test container health
 HEALTHCHECK CMD chronyc -n tracking || exit 1
