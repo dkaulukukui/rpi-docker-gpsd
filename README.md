@@ -117,6 +117,12 @@ cd rpi-docker-gpsd-chrony
 sudo docker build -t rpi-gpsd .
 ```
 
+Alternatively a pre-built image (using 38400 baud) can be downloaded and installed from docker hub
+
+```bash
+sudo docker image pull dkaulukukui/rpi-docker-gpsd-chrony
+```
+
 ### 6. Bring up the container
 
 The command to bring up both containers (attached to the stdio terminal, useful for debugging) is:
