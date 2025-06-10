@@ -2,12 +2,6 @@ FROM alpine:3.22
 # working as of 2025-06-03 on Alpine version 3.22.0
 # not working on Alpine version 3.21.3
 
-# Print the UID and GID
-# CMD sh -c "echo 'Inside Container:' && echo 'User: $(whoami) UID: $(id -u) GID: $(id -g)'"
-
-# install packages as root
-#USER root # install packages as root
-
 ARG BUILD_DATE
 
 # first, a bit about this container
@@ -32,9 +26,6 @@ EXPOSE 2947
 
 # Expose the chrony ntp port
 EXPOSE 123/udp
-
-# Copy chrony config file 
-#COPY chrony.conf /etc/chrony/chrony.conf
 
 # marking volumes that need to be writable
 VOLUME /etc/chrony /run/chrony /var/lib/chrony /var/log/chrony
