@@ -82,7 +82,7 @@ def analyze_chrony_stats(file_path):
 
 # Example usage
 if __name__ == "__main__":
-    file_path = "chrony_statistics.log"  # Replace with your file path
+    file_path = "./calibration/chrony_statistics.log"  # Replace with your file path
     df, summary, plot = analyze_chrony_stats(file_path)
     
     # Print summary statistics
