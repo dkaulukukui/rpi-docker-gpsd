@@ -7,7 +7,6 @@ services:
             - /dev/ttyAMA0
             - /dev/pps0
         ports:
-            #- 2948:2947
             - 123:123
         container_name: gpsd
         cap_add:
