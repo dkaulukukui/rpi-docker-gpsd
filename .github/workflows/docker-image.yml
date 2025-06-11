@@ -23,6 +23,7 @@ jobs:
       - name: build_push
         uses: docker/build-push-action@v5
         with:
+          platforms: linux/arm/v8
           context: .
           push: true
           tags: >
