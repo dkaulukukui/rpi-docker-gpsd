@@ -8,11 +8,11 @@ services:
             - /dev/pps0
         ports:
             - 123:123
-        container_name: gpsd
+        container_name: gpsd-chrony
         cap_add:
             - SYS_TIME
         privileged: true
-        image: rpi-gpsd
+        image: dkaulukukui/rpi-docker-gpsd-chrony
         volumes:
             - chrony_logs:/var/log/chrony
             - chrony_drift:/var/lib/chrony
