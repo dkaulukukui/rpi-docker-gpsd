@@ -114,7 +114,7 @@ cd rpi-docker-gpsd-chrony
 ```
 
 ```bash
-sudo docker build -t rpi-gpsd .
+sudo docker build -t dkaulukukui/rpi-docker-gpsd-chrony .
 ```
 
 Alternatively a pre-built image (using 38400 baud) can be downloaded and installed from docker hub
@@ -157,7 +157,7 @@ sudo docker compose up --detach
     - Attach container terminal 
 
         ```bash
-        sudo docker exec -it gpsd bash
+        sudo docker exec -it gpsd-chrony bash
         ```
 
     - Verify PPS signal.
