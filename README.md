@@ -127,7 +127,7 @@ sudo docker image pull dkaulukukui/rpi-docker-gpsd-chrony
 
 ### 6. Bring up the container
 
-The command to bring up both containers (attached to the stdio terminal, useful for debugging) is:
+The command to bring up container (attached to the stdio terminal, useful for debugging) is:
 
 ```bash
 cd rpi-docker-gpsd-chrony
@@ -137,7 +137,7 @@ cd rpi-docker-gpsd-chrony
 sudo docker compose up 
 ```
 
-The command to bring up both containers in the background is:
+The command to bring up container in the background is (RECOMMENDED):
 
 ```bash 
 sudo docker compose up --detach
@@ -292,14 +292,19 @@ sudo docker compose up --detach
         Leap status     : Normal
         ```
 
+	[Chronyc Tracking Field Explanation](https://chrony-project.org/doc/3.3/chronyc.html)
+
 
 4. Verify System time
 
     ```bash
     date
     ```
+
+5. Perform additional offset calbiration and fine tuning
+
+   Follow calibration README instructions found in [Calibration Procedure](calibration/CHRONY_OFFSET_CALIBRATION.md)
 			
 ## To do: 
 - dial back docker --privlidged flag and make sure everything still works
-- develop offset calculation and verification procedure to determine and quantify system timing accuracy
 
