@@ -24,8 +24,8 @@ Raspberry Pi configuration: [UART Confguration](https://www.raspberrypi.com/docu
 
 - Raspberry Pi 4 with Docker installed.
     - tested on RPI 4 Model B (8GB RAM) 
-    - tested on Debian 12 (Bookworm) with Kernal version 6.6.51+rpt-rpi-v8
-    - tested on Docker version 27.5.1
+    - tested on Debian 12 (Bookworm) with Kernal version 6.6.51+rpt-rpi-v8 (64 bit)
+    - tested on Docker version 27.5.1 [64-bit Debian Docker installation](https://docs.docker.com/engine/install/debian/)
 - GPS module (timing model preferred)
     - tested on [Sparkfun Zed-9P](https://www.sparkfun.com/sparkfun-gps-rtk-sma-breakout-zed-f9p-qwiic.html)
 - 5 wires needed – +VDC/RX/TX/GND/PPS
